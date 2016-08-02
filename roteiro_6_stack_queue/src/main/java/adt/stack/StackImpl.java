@@ -4,36 +4,38 @@ public class StackImpl<T> implements Stack<T> {
 
 	private T[] array;
 	private int top;
-	private int size;
+	private final int CAP;
+	private static final int ZERO = 0;
 
 	@SuppressWarnings("unchecked")
 	public StackImpl(int size) {
+		// isso aqui eh pra manter as coisas em ordem, caso voce tente um teste 'engracadinho'
+		if (size < ZERO) {
+			size = ZERO;
+		}
+		
 		array = (T[]) new Object[size];
-		top = -1;
-		this.size = size;
+		this.top = -1;
+		CAP = size;
 	}
 
 	@Override
 	public T top() {
-		return array[this.top];
+		if (this.isEmpty()) {
+			return null;
+		} else {
+			return this.array[this.top];
+		}
 	}
 
 	@Override
 	public boolean isEmpty() {
-		if (this.top == -1) {
-			return true;
-		}
-		
-		return false;
+		return this.top == -1;
 	}
 
 	@Override
 	public boolean isFull() {
-		if (this.top == this.size - 1) {
-			return true;
-		}
-		
-		return false;
+		return this.top == CAP - 1;
 	}
 
 	@Override
@@ -41,8 +43,10 @@ public class StackImpl<T> implements Stack<T> {
 		if (isFull()) {
 			throw new StackOverflowException();
 		} else {
-			this.top++;
-			array[this.top] = element;
+			if (element != null) {
+				this.top++;
+				this.array[this.top] = element;
+			}
 		}
 	}
 
@@ -51,7 +55,7 @@ public class StackImpl<T> implements Stack<T> {
 		if (isEmpty()) {
 			throw new StackUnderflowException();
 		} else {
-			T elem = array[this.top];
+			T elem = this.array[this.top];
 			this.top--;
 			return elem;
 		}
