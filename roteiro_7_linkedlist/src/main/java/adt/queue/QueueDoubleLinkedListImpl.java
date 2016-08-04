@@ -32,6 +32,7 @@ public class QueueDoubleLinkedListImpl<T> implements Queue<T> {
 	public T dequeue() throws QueueUnderflowException {
 		if (isEmpty()) {
 			throw new QueueUnderflowException();
+			
 		} else {
 			T elem = this.head();
 			this.list.removeFirst();
