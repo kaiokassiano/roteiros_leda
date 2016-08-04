@@ -2,9 +2,10 @@ package adt.linkedList;
 
 public class SingleLinkedListImpl<T> implements LinkedList<T> {
 
+	
+	protected static final int ONE = 1;
+	
 	protected SingleLinkedListNode<T> head;
-	
-	
 	
 	public SingleLinkedListImpl() {
 		this.head = new SingleLinkedListNode<T>();
@@ -74,8 +75,8 @@ public class SingleLinkedListImpl<T> implements LinkedList<T> {
 	@Override
 	public void remove(T element) {
 		if (element != null && !isEmpty()) {
-			if (this.getHead().getData().equals(element)) {
-				
+			if (this.head.getData().equals(element)) {
+				head = head.getNext();
 			} else {
 				SingleLinkedListNode<T> previous = new SingleLinkedListNode<T>();
 				SingleLinkedListNode<T> aux = this.getHead();
@@ -93,6 +94,7 @@ public class SingleLinkedListImpl<T> implements LinkedList<T> {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public T[] toArray(){
 		int size = this.size();
@@ -114,6 +116,7 @@ public class SingleLinkedListImpl<T> implements LinkedList<T> {
 		return head;
 	}
 
+	// esse metodo eh perigoso.
 	public void setHead(SingleLinkedListNode<T> head) {
 		this.head = head;
 	}
