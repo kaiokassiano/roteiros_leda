@@ -8,14 +8,14 @@ import util.Util;
 /**
  * O comportamento de qualquer heap é definido pelo heapify. Neste caso o
  * heapify dessa heap deve comparar os elementos e colocar o maior sempre no
- * topo. Essa comparação não é feita diretamente com os elementos armazenados,
- * mas sim usando um comparator. Dessa forma, dependendo do comparator, a heap
- * pode funcionar como uma max-heap ou min-heap.
+ * topo. Essa comparação não é feita diretamente com os elementos
+ * armazenados, mas sim usando um comparator. Dessa forma, dependendo do
+ * comparator, a heap pode funcionar como uma max-heap ou min-heap.
  */
 public class HeapImpl<T extends Comparable<T>> implements Heap<T> {
 
 	private static final int ZERO = 0;
-	
+
 	protected T[] heap;
 	protected int index = -1;
 	/**
@@ -85,17 +85,17 @@ public class HeapImpl<T extends Comparable<T>> implements Heap<T> {
 		int leftIndex = this.left(position);
 		int rightIndex = this.right(position);
 		int aux = position;
-		
+
 		if (leftIndex <= this.index) {
 			aux = leftIndex;
 		}
-		
+
 		if (rightIndex <= this.index) {
 			aux = maiorElemento(this.heap, leftIndex, rightIndex);
 		}
-		
+
 		aux = maiorElemento(this.heap, position, aux);
-		
+
 		if (aux != position) {
 			Util.swap(this.heap, aux, position);
 			this.heapify(aux);
@@ -109,13 +109,13 @@ public class HeapImpl<T extends Comparable<T>> implements Heap<T> {
 			heap = Arrays.copyOf(heap, heap.length + INCREASING_FACTOR);
 		}
 		// /////////////////////////////////////////////////////////////////
-		
+
 		if (element != null) {
-			
+
 			this.index++;
 			this.heap[this.index] = element;
 			int i = this.index;
-			
+
 			while (maiorElemento(this.heap, i, this.parent(i)) == i && this.parent(i) != i) {
 				Util.swap(this.heap, i, this.parent(i));
 				i = this.parent(i);
@@ -127,8 +127,9 @@ public class HeapImpl<T extends Comparable<T>> implements Heap<T> {
 	public void buildHeap(T[] array) {
 		this.heap = array;
 		this.index = array.length - 1;
-		
-		// Ate a metade, ja que da metade pra o fim todos os elementos sao folhas
+
+		// Ate a metade, ja que da metade pra o fim todos os elementos sao
+		// folhas
 		for (int i = array.length / 2; i >= ZERO; i--) {
 			this.heapify(i);
 		}
@@ -152,27 +153,28 @@ public class HeapImpl<T extends Comparable<T>> implements Heap<T> {
 		// Salvando o comparator antigo.
 		Comparator<T> comparator = this.comparator;
 
-        this.index = -1;
-        
-        // Campelo mandou um e-mail, dizendo que era pra ordenar sempre de forma crescente. Entao, to garantindo isso na linha abaixo.
-        this.comparator = (a, b) -> b.compareTo(a);        
-        
-        buildHeap(array);
-        
-        T[] newArray = (T[]) (new Comparable[this.size()]);
-        
-        for (int index = ZERO; index < newArray.length; index++) {
-            newArray[index] = this.extractRootElement();
-        }
+		this.index = -1;
 
-        // Isso aqui eh apenas pra fazer com que a heap volte ao estado normal, ja que os elementos foram removidos
-        // exemplo: ao inves dela ficar [int, int, int, int] com o index sendo -1, ela vai ficar [null, null, null, null]
-        this.heap = (T[]) (new Comparable[INITIAL_SIZE]);
-        
-        // Retorno o comparator ao estado inicial
-        this.comparator = comparator;
-        
-        return newArray;
+		// Campelo mandou um e-mail, dizendo que era pra ordenar sempre de forma
+		// crescente. Entao, to garantindo isso na linha abaixo.
+		this.comparator = (a, b) -> b.compareTo(a);
+
+		buildHeap(array);
+
+		T[] newArray = (T[]) (new Comparable[this.size()]);
+
+		for (int index = ZERO; index < newArray.length; index++) {
+			newArray[index] = this.extractRootElement();
+		}
+
+		// Isso aqui eh apenas pra fazer com que a heap volte ao estado normal, ja que os elementos foram removidos
+		// exemplo: ao inves dela ficar [int, int, int, int] com o index sendo -1, ela vai ficar [null, null, null, null]
+		this.heap = (T[]) (new Comparable[INITIAL_SIZE]);
+
+		// Retorno o comparator ao estado inicial
+		this.comparator = comparator;
+
+		return newArray;
 	}
 
 	@Override
@@ -191,11 +193,13 @@ public class HeapImpl<T extends Comparable<T>> implements Heap<T> {
 	public T[] getHeap() {
 		return heap;
 	}
-	
-	// Metodos abaixo criados para ajudar na modularizacao/legibilidade/implementacao.
-	
+
+	// Metodos abaixo criados para ajudar na
+	// modularizacao/legibilidade/implementacao.
+
 	/**
 	 * Retorna o indice do maior entre dois elementos.
+	 * 
 	 * @param array
 	 * @param x
 	 * @param y
@@ -207,9 +211,11 @@ public class HeapImpl<T extends Comparable<T>> implements Heap<T> {
 		else
 			return elem2;
 	}
-	
+
 	/**
-	 * Remove um elemento da heap. Esse metodo eh usado apenas para a remocao da root.
+	 * Remove um elemento da heap. Esse metodo eh usado apenas para a remocao da
+	 * root.
+	 * 
 	 * @param index
 	 */
 	private void remove(int index) {
