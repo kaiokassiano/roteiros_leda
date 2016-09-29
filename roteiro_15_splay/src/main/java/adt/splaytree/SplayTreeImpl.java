@@ -102,8 +102,4 @@ public class SplayTreeImpl<T extends Comparable<T>> extends BSTImpl<T> implement
 			splay(node);
 		}
 	}
-	
-	public void printTree() {
-		this.getRoot().printTree();
-	}
 }

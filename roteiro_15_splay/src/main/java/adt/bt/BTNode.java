@@ -84,31 +84,31 @@ public class BTNode<T> {
 		this.parent = parent;
 	}
 
-	public void printTree() {
-	    if (right != null && !right.isEmpty()) {
-	        getRight().printTree(true, "");
-	    }
-	    System.out.println(this.data + "");
-	    if (left != null && !left.isEmpty()) {
-	        getLeft().printTree(false, "");
-	    }
-	}
-
-	public void printTree(boolean isRight, String indent) {
-	    if (right != null && !right.isEmpty()) {
-	        getRight().printTree(true, indent + (isRight ? "       " : " |      "));
-	    }
-	    System.out.print(indent);
-	    if (isRight) {
-	    	System.out.print(" /");
-	    } else {
-	    	System.out.print(" \\");
-	    }
-	    System.out.print("----- ");
-	    System.out.println(this.data + "");
-	    if (left != null && !left.isEmpty()) {
-	        getLeft().printTree(false, indent + (isRight ? " |      " : "        "));
-	    }
-	}
-	
+//	public void printTree() {
+//	    if (right != null && !right.isEmpty()) {
+//	        getRight().printTree(true, "");
+//	    }
+//	    System.out.println(this.data + "");
+//	    if (left != null && !left.isEmpty()) {
+//	        getLeft().printTree(false, "");
+//	    }
+//	}
+//
+//	public void printTree(boolean isRight, String indent) {
+//	    if (right != null && !right.isEmpty()) {
+//	        getRight().printTree(true, indent + (isRight ? "       " : " |      "));
+//	    }
+//	    System.out.print(indent);
+//	    if (isRight) {
+//	    	System.out.print(" /");
+//	    } else {
+//	    	System.out.print(" \\");
+//	    }
+//	    System.out.print("----- ");
+//	    System.out.println(this.data + "");
+//	    if (left != null && !left.isEmpty()) {
+//	        getLeft().printTree(false, indent + (isRight ? " |      " : "        "));
+//	    }
+//	}
+//	
 }
