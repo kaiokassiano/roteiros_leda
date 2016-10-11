@@ -112,20 +112,6 @@ public class AVLTreeImpl<T extends Comparable<T>> extends BSTImpl<T> implements 
 	}
 
 	// AUXILIARY
-	protected void rebalanceUp(BSTNode<T> node) {
-		if (node == null || node.isEmpty()) {
-			return;
-		}
-
-		BSTNode<T> parent = (BSTNode<T>) node.getParent();
-
-		while (!parent.isEmpty()) {
-			rebalance(parent);
-			parent = (BSTNode<T>) parent.getParent();
-		}
-	}
-
-	// AUXILIARY
 	protected void rebalance(BSTNode<T> node) {
 		if (node == null || node.isEmpty()) {
 			return;
@@ -153,6 +139,20 @@ public class AVLTreeImpl<T extends Comparable<T>> extends BSTImpl<T> implements 
 			}
 
 			this.leftRotation(node);
+		}
+	}
+
+	// AUXILIARY
+	protected void rebalanceUp(BSTNode<T> node) {
+		if (node == null || node.isEmpty()) {
+			return;
+		}
+
+		BSTNode<T> parent = (BSTNode<T>) node.getParent();
+
+		while (!parent.isEmpty()) {
+			rebalance(parent);
+			parent = (BSTNode<T>) parent.getParent();
 		}
 	}
 

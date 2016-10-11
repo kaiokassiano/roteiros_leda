@@ -4,9 +4,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 
 public class BNode<T extends Comparable<T>> {
-	private static final int ZERO = 0;
-	private static final int ONE = 1;
-	
+
 	protected LinkedList<T> elements; // PODERIA TRABALHAR COM ARRAY TAMBEM
 	protected LinkedList<BNode<T>> children; // PODERIA TRABALHAR COM ARRAY
 												// TAMBEM
@@ -26,6 +24,7 @@ public class BNode<T extends Comparable<T>> {
 		return this.elements.toString();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean equals(Object obj) {
 		boolean resp = false;
@@ -91,110 +90,65 @@ public class BNode<T extends Comparable<T>> {
 	}
 
 	protected void split() {
-		T mid = elements.get(elements.size() / 2);
+		int mid = (size()) / 2;
 
-		BNode<T> firstHalfNodes = new BNode<T>(maxChildren);
-		BNode<T> secondHalfNodes = new BNode<T>(maxChildren);
-		
-		for (int i = 0; i < this.elements.size(); i++) {
-			if (mid.compareTo(this.getElementAt(i)) > 0)
-				firstHalfNodes.elements.add(this.getElementAt(i));
-			else if (mid.compareTo(this.getElementAt(i)) < 0)
-				secondHalfNodes.elements.add(this.getElementAt(i));
+		BNode<T> left = this.copyLeft(mid);
+		BNode<T> right = this.copyRight(mid);
+
+		if (parent == null) {
+			parent = new BNode<T>(maxChildren);
+			parent.children.addFirst(this);
 		}
-		
-		if (this.parent == null && this.isLeaf()) {
-			
-			this.setElements(new LinkedList<T>());
-			this.addElement(mid);
-			
-			firstHalfNodes.parent = this;
-			secondHalfNodes.parent = this;
-			
-			this.addChild(ZERO, firstHalfNodes);
-			this.addChild(ONE, secondHalfNodes);
-		
-		} else if (this.parent == null && !this.isLeaf()) {
-			
-			LinkedList<BNode<T>> childrenList = this.children;
-			
-			this.setElements(new LinkedList<T>());
-			this.addElement(mid);
-			this.setChildren(new LinkedList<BNode<T>>());
-			
-			firstHalfNodes.parent = this;
-			secondHalfNodes.parent = this;
-			
-			this.addChild(ZERO, firstHalfNodes);
-			this.addChild(ONE, secondHalfNodes);
-			
-			if (!this.isLeaf()) {
-				checkNodes(ZERO, firstHalfNodes.size() + ONE, firstHalfNodes, childrenList);
-				checkNodes(secondHalfNodes.size() + ONE, childrenList.size(), secondHalfNodes, childrenList);
-			}
-			
-		} else if (this.isLeaf()) {
-			
-			BNode<T> toPromoteNode = new BNode<>(maxChildren);
-			
-			toPromoteNode.elements.add(mid);
-			toPromoteNode.parent = this.parent;
 
-			firstHalfNodes.parent = this.parent;
-			secondHalfNodes.parent = this.parent;
+		BNode<T> parent = this.parent;
 
-			int position = findPosition(mid, toPromoteNode.parent.getElements());
-			int left = position;
-			int right = position + 1;
-			
-			parent.children.set(left, firstHalfNodes);
-			parent.children.add(right, secondHalfNodes);
+		int index = parent.indexOfChild(this);
+		parent.removeChild(this);
 
-			toPromoteNode.promote();
-			
-		} else {
-			
-			LinkedList<BNode<T>> childrenList = this.children;
+		parent.addChild(index, left);
+		parent.addChild(index + 1, right);
 
-			BNode<T> toPromoteNode = new BNode<>(maxChildren);
-			toPromoteNode.elements.add(mid);
-			toPromoteNode.parent = this.parent;
+		left.setParent(parent);
+		right.setParent(parent);
 
-			firstHalfNodes.parent = this.parent;
-			secondHalfNodes.parent = this.parent;
+		this.promote(mid);
 
-			int position = findPosition(mid, toPromoteNode.parent.getElements());
-			int left = position;
-			int right = position + ONE;
-
-			parent.children.add(left, firstHalfNodes);
-			parent.children.add(right, secondHalfNodes);
-
-			int aux1 = ZERO;
-			int aux2 = ZERO;
-			
-			for (int i = 0; i < childrenList.size(); i++) {
-				if (childrenList.get(i).elements.get(ZERO).compareTo(mid) < ZERO)
-					firstHalfNodes.addChild(aux1++, childrenList.get(i));
-				else
-					secondHalfNodes.addChild(aux2++, childrenList.get(i));
-			}
-			
-			parent.removeChild(this);
-			toPromoteNode.promote();
+		if (parent.size() >= maxChildren) {
+			parent.split();
 		}
 	}
 
-	protected void promote() {
-		LinkedList<T> lista = this.parent.getElements();
+	protected void promote(int mid) {
+		T element = elements.get(mid);
+		this.parent.addElement(element);
+	}
 
-		int index = findPosition(this.getElementAt(ZERO), lista);
+	private BNode<T> copyLeft(int mid) {
+		BNode<T> node = new BNode<T>(this.maxChildren);
 
-		lista.add(index, this.getElementAt(ZERO));
+		for (int i = 0; i < mid; i++) {
+			node.addElement(this.elements.get(i));
+		}
 
-		if (this.parent.size() > maxKeys)
-			this.parent.split();
+		for (int i = 0; i <= mid; i++) {
+			node.addChild(i, this.children.get(i));
+		}
 
+		return node;
+	}
+
+	private BNode<T> copyRight(int mid) {
+		BNode<T> node = new BNode<T>(this.maxChildren);
+
+		for (int i = mid + 1; i < elements.size(); i++) {
+			node.addElement(this.elements.get(i));
+		}
+
+		for (int i = mid + 1; i < this.children.size(); i++) {
+			node.addChild(i - mid - 1, this.children.get(i));
+		}
+
+		return node;
 	}
 
 	public LinkedList<T> getElements() {
@@ -248,28 +202,6 @@ public class BNode<T extends Comparable<T>> {
 
 	public void setMaxChildren(int maxChildren) {
 		this.maxChildren = maxChildren;
-	}
-
-	// METODOS DE AUXILIO PARA O SPLIT E PARA O PROMOTE.
-	// ESTOU CRIANDO METODOS EXTRAS PQ AMBAS AS CLASSES (BNode e BTreeImpl) VAO
-	// SER ENVIADAS
-
-	private int findPosition(T element, LinkedList<T> lista) {
-
-		for (int i = 0; i < lista.size(); i++) {
-			if (lista.get(i).compareTo(element) > ZERO) {
-				return i;
-			}
-		}
-
-		return lista.size();
-	}
-
-	private void checkNodes(int leftIndex, int rightIndex, BNode<T> parent,  LinkedList<BNode<T>> children) {
-		for (int i = leftIndex; i < rightIndex; i++) {
-			int index = findPosition(children.get(i).elements.get(ZERO), parent.getElements());
-			parent.addChild(index, children.get(i));
-		}
 	}
 
 }

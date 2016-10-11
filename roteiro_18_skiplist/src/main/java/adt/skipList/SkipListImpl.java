@@ -1,9 +1,7 @@
+
 package adt.skipList;
 
 public class SkipListImpl<T> implements SkipList<T> {
-
-	private static final int ZERO = 0;
-	private static final int SENTINEL_NODES_COUNT = 2;
 
 	protected SkipListNode<T> root;
 	protected SkipListNode<T> NIL;
@@ -11,9 +9,19 @@ public class SkipListImpl<T> implements SkipList<T> {
 	protected int height;
 	protected int maxHeight;
 
-	protected boolean USE_MAX_HEIGHT_AS_HEIGHT;
+	protected boolean USE_MAX_HEIGHT_AS_HEIGHT = true;/*
+														 * OBS: FOI PRECISO
+														 * INICIALIZAR COM TRUE
+														 * PARA TESTAR, PARA
+														 * TESTAR FALSE EH
+														 * PRECISO TROCAR ESSE
+														 * VALOR AQUI E NA
+														 * CLASSE DE TESTE PARA
+														 * FALSE
+														 */
 	protected double PROBABILITY = 0.5;
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public SkipListImpl(int maxHeight) {
 		if (USE_MAX_HEIGHT_AS_HEIGHT) {
 			this.height = maxHeight;
@@ -27,18 +35,18 @@ public class SkipListImpl<T> implements SkipList<T> {
 	}
 
 	/**
-	 * Faz a ligacao inicial entre os apontadores forward do ROOT e o NIL. Caso
+	 * Faz a ligacao inicial entre os apontadores forward do ROOT e o NIL Caso
 	 * esteja-se usando o level do ROOT igual ao maxLevel esse metodo deve
 	 * conectar todos os forward. Senao o ROOT eh inicializado com level=1 e o
 	 * metodo deve conectar apenas o forward[0].
 	 */
 	private void connectRootToNil() {
 		if (USE_MAX_HEIGHT_AS_HEIGHT) {
-			for (int i = maxHeight; i >= 0; i++) {
+			for (int i = 0; i < maxHeight; i++) {
 				root.forward[i] = NIL;
 			}
 		} else {
-			root.forward[ZERO] = NIL;
+			root.getForward()[0] = NIL;
 		}
 	}
 
@@ -46,6 +54,7 @@ public class SkipListImpl<T> implements SkipList<T> {
 	 * Metodo que gera uma altura aleatoria para ser atribuida a um novo no no
 	 * metodo insert(int,V)
 	 */
+	@SuppressWarnings("unused")
 	private int randomLevel() {
 		int randomLevel = 1;
 		double random = Math.random();
@@ -55,15 +64,127 @@ public class SkipListImpl<T> implements SkipList<T> {
 		return randomLevel;
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public void insert(int key, T newValue, int height) {
+
+		SkipListNode<T>[] update = new SkipListNode[maxHeight];
+		SkipListNode<T> node = root;
+
+		for (int i = (height - 1); i >= 0; i--) {
+			while (node.getForward(i) != null && node.getForward(i).getKey() < key) {
+				node = node.getForward(i);
+			}
+
+			update[i] = node;
+		}
+
+		node = node.getForward(0);
+
+		if (node.getKey() == key) {
+			if (node.height == height) {
+				node.setValue(newValue);
+			} else {
+				remove(key);
+				insert(key, newValue, height);
+			}
+		} else {
+			int newLevel = height;
+
+			if (newLevel > this.height) {
+				for (int i = this.height; i < newLevel; i++) {
+					update[i] = root;
+				}
+
+				this.height = newLevel;
+			}
+
+			node = new SkipListNode<T>(key, newLevel, newValue);
+			for (int i = 0; i < newLevel; i++) {
+				if (update[i].getForward(i) == null) {
+					node.getForward()[i] = NIL;
+				} else {
+					node.getForward()[i] = update[i].getForward(i);
+				}
+
+				update[i].getForward()[i] = node;
+			}
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public void remove(int key) {
+		SkipListNode<T>[] update = new SkipListNode[maxHeight];
+		SkipListNode<T> x = root;
+		for (int i = (height - 1); i >= 0; i--) {
+			while (x.forward[i].getKey() < key) {
+				x = x.getForward(i);
+			}
+
+			update[i] = x;
+		}
+		x = x.getForward(0);
+
+		if (x.getKey() == key) {
+			for (int i = 0; i < height; i++) {
+				if (!update[i].getForward(i).equals(x)) {
+					break;
+				}
+
+				update[i].forward[i] = x.forward[i];
+
+				while (height > 1 && root.forward[height - 1].equals(NIL)) {
+					if (USE_MAX_HEIGHT_AS_HEIGHT) {
+						height--;
+					} else {
+						root.forward[height - 1] = null;
+						height--;
+					}
+				}
+			}
+		}
+	}
+
+	@Override
+	public int height() {
+		int i;
+		for (i = 0; i < height; i++) {
+			if (root.forward[i] == NIL) {
+				break;
+			}
+		}
+
+		return i;
+	}
+
+	@Override
+	public SkipListNode<T> search(int key) {
+		SkipListNode<T> node = this.root;
+
+		for (int i = (height - 1); i >= 0; i--) {
+			while (node.forward[i].getKey() < key) {
+				node = node.forward[i];
+			}
+		}
+
+		node = node.forward[0];
+
+		if (node.getKey() != key) {
+			node = null;
+		}
+
+		return node;
+	}
+
 	@Override
 	public int size() {
-		int size = ZERO;
+		int size = 0;
 
-		SkipListNode<T> aux = this.root.forward[ZERO];
-
-		while (aux != null && !aux.equals(NIL)) {
+		SkipListNode<T> node = root.getForward(0);
+		while (node != NIL) {
 			size++;
-			aux = aux.forward[ZERO];
+			node = node.getForward(0);
 		}
 
 		return size;
@@ -71,133 +192,18 @@ public class SkipListImpl<T> implements SkipList<T> {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void insert(int key, T newValue, int height) {
-		if (height <= this.maxHeight) {
-
-			updateRootPointers(height);
-
-			SkipListNode<T>[] savedPointers = new SkipListNode[this.height];
-			SkipListNode<T> aux = this.root;
-
-			for (int i = this.height - 1; i >= 0; i--) {
-				while (aux.getForward(i) != null && aux.getForward(i).getKey() < key)
-					aux = aux.getForward(i);
-
-				savedPointers[i] = aux;
-			}
-
-			aux = aux.forward[ZERO];
-
-			if (aux.getKey() == key)
-				aux.setValue(newValue);
-			else {
-				// finalmente, faz a insercao
-				aux = new SkipListNode<T>(key, height, newValue);
-
-				for (int i = 0; i < height; i++) {
-					aux.forward[i] = savedPointers[i].forward[i];
-					savedPointers[i].forward[i] = aux;
-				}
-			}
-		}
-	}
-
-	@Override
-	public void remove(int key) {
-		// primeiro procura, pra remover. se nao achar, nao remove
-		SkipListNode<T> update = this.search(key);
-
-		if (update != null) {
-
-			SkipListNode<T> aux = root;
-			int nodeHeight = update.height;
-			int actualHeight = nodeHeight - 1;
-
-			for (int i = actualHeight; i >= 0; i--) {
-
-				SkipListNode<T> auxForward = aux.getForward(nodeHeight - 1);
-				int auxKey = auxForward.getKey();
-
-				// atualizar os links entre antecessores e sucessores
-				while (aux.getKey() < key && auxKey < key) {
-					aux = auxForward;
-					auxForward = aux.getForward(nodeHeight - 1);
-					auxKey = auxForward.getKey();
-				}
-
-				aux.getForward()[--nodeHeight] = update.getForward(nodeHeight);
-			}
-		}
-	}
-
-	@Override
-	public int height() {
-		return this.checkHeight();
-	}
-
-	@Override
-	public SkipListNode<T> search(int key) {
-		int actualHeight = this.height() - 1;
-		SkipListNode<T> aux = this.root;
-
-		while (aux != null && actualHeight >= 0) {
-			int next = aux.getForward(actualHeight).getKey();
-			int auxKey = aux.getKey();
-
-			if (next > key)
-				actualHeight--;
-			else if (auxKey == key)
-				break;
-			else
-				aux = aux.getForward(actualHeight);
-		}
-		return aux == null || aux.getKey() != key ? null : aux;
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
 	public SkipListNode<T>[] toArray() {
-		int size = this.size() + SENTINEL_NODES_COUNT;
+		SkipListNode<T>[] array = new SkipListNode[size() + 2];
 
-		SkipListNode<T>[] array = new SkipListNode[size];
-		SkipListNode<T> aux = this.root;
+		int i = 0;
 
-		for (int i = 0; i < array.length; i++) {
-			array[i] = aux;
-			aux = aux.getForward(ZERO);
+		SkipListNode<T> node = root;
+		while (node != null) {
+			array[i++] = node;
+			node = node.getForward(0);
 		}
 
 		return array;
-	}
-
-	/**
-	 * Checa se a skip list esta usando maxHeight
-	 * 
-	 * @return valor inteiro do height
-	 */
-	private int checkHeight() {
-		return (USE_MAX_HEIGHT_AS_HEIGHT) ? maxHeight : height;
-	}
-
-	/**
-	 * Atualiza os ponteiros do root na hora da insercao, pois o boolean
-	 * USE_MAX_HEIGHT_AS_HEIGHT nao eh recebido no construtor, ocasionando um
-	 * problema
-	 * 
-	 * @param height
-	 *            da skip list
-	 */
-	private void updateRootPointers(int height) {
-		if (USE_MAX_HEIGHT_AS_HEIGHT)
-			height = this.maxHeight;
-
-		if (this.height < height) {
-
-			for (int i = this.height; i < height; i++)
-				this.root.forward[i] = NIL;
-
-			this.height = height;
-		}
 	}
 
 }

@@ -1,18 +1,12 @@
+
 package adt.btree;
 
 public class BTreeImpl<T extends Comparable<T>> implements BTree<T> {
-
-	private static final int ZERO = 0;
 
 	protected BNode<T> root;
 	protected int order;
 
 	public BTreeImpl(int order) {
-
-		// apenas para evitar erros em testes mais 'ousados'
-		if (order < ZERO)
-			order = ZERO;
-
 		this.order = order;
 		this.root = new BNode<T>(order);
 	}
@@ -29,41 +23,33 @@ public class BTreeImpl<T extends Comparable<T>> implements BTree<T> {
 
 	@Override
 	public int height() {
-		return height(this.root);
+		return isEmpty() ? -1 : height(this.root);
 	}
 
 	private int height(BNode<T> node) {
-		int value = -1;
+		if (node.isLeaf())
+			return 0;
 
-		if (!node.isEmpty()) {
-			if (!node.isLeaf())
-				value = 1 + height(node.getChildren().get(ZERO));
-			else
-				value = 0;
-		}
-
-		return value;
+		return 1 + height(node.getChildren().getFirst());
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public BNode<T>[] depthLeftOrder() {
-		BNode<T>[] lista = new BNode[this.size()];
-		depthLeftOrder(this.root, lista, ZERO);
+		BNode<T>[] array = new BNode[this.countNodes()];
 
-		return lista;
+		depthLeftOrder(array, 0, this.root);
+
+		return array;
 	}
 
-	private int depthLeftOrder(BNode<T> node, BNode<T> array[], int index) {
+	private int depthLeftOrder(BNode<T> array[], int index, BNode<T> node) {
 		if (!node.isEmpty()) {
-			
-			array[index] = node;
-			index++;
+			array[index++] = node;
 
-			for (int i = 0; i < node.getChildren().size(); i++) {
-				index = depthLeftOrder(node.getChildren().get(i), array, index);
+			for (int i = 0; i < node.children.size(); i++) {
+				index = depthLeftOrder(array, index, node.children.get(i));
 			}
-
 		}
 
 		return index;
@@ -74,103 +60,106 @@ public class BTreeImpl<T extends Comparable<T>> implements BTree<T> {
 		return size(this.root);
 	}
 
-	private int size(BNode<T> node) {
-		int size = 0;
+	public int size(BNode<T> node) {
+		if (node.isEmpty())
+			return 0;
 
-		if (!node.isEmpty()) {
-			size += node.size();
+		int total = node.size();
 
-			for (int i = 0; i < node.getChildren().size(); i++) {
-				size += size(node.getChildren().get(i));
-			}
+		for (int i = 0; i < node.children.size(); i++) {
+			total += size(node.children.get(i));
 		}
 
-		return size;
+		return total;
+	}
+
+	public int countNodes() {
+		return countNodes(this.root);
+	}
+
+	private int countNodes(BNode<T> node) {
+		if (node.isEmpty())
+			return 0;
+
+		int total = 1;
+
+		for (int i = 0; i < node.children.size(); i++) {
+			total += countNodes(node.children.get(i));
+		}
+
+		return total;
 	}
 
 	@Override
 	public BNodePosition<T> search(T element) {
-		return (element != null) ? search(element, this.root) : null;
+		if (element == null)
+			return new BNodePosition<T>();
+
+		return search(root, element);
 	}
 
-	private BNodePosition<T> search(T element, BNode<T> node) {
-
+	private BNodePosition<T> search(BNode<T> node, T element) {
 		int index = 0;
 
-		while (this.isLower(node, element, index))
+		while (index < node.getElements().size() && element.compareTo(node.getElementAt(index)) > 0) {
 			index++;
+		}
 
-		if (this.isEqual(node, element, index))
+		if (index < node.getElements().size() && element.compareTo(node.getElementAt(index)) == 0)
 			return new BNodePosition<T>(node, index);
 
 		if (node.isLeaf())
 			return new BNodePosition<T>();
 
-		return search(element, node.getChildren().get(index));
-
+		return search(node.getChildren().get(index), element);
 	}
 
 	@Override
 	public void insert(T element) {
-		if (element != null) {
-			
-			BNode<T> auxNode = searchLeafNode(element, this.root);
-			auxNode.addElement(element);
-			
-			while (auxNode.getParent() != null) {
-				if (auxNode.isFull()) {
-					
-					this.split(auxNode);
-					this.promote(auxNode);
+		if (element == null)
+			return;
+
+		insert(root, element);
+	}
+
+	private void insert(BNode<T> node, T element) {
+		int index = 0;
+
+		while (index < node.getElements().size() && element.compareTo(node.getElementAt(index)) > 0) {
+			index++;
+		}
+
+		if (node.isLeaf()) {
+			node.addElement(element);
+			node.addChild(index, new BNode<T>(this.order));
+
+			if (node.size() > node.getMaxKeys()) {
+				node.split();
+
+				// atualiza o root
+				while (node.parent != null) {
+					node = node.parent;
 				}
-				
-				auxNode = auxNode.getParent();
-			}
-			
-			if (auxNode.isFull()) {
-				BNode<T> node = new BNode<T>(auxNode.getMaxChildren());
-				node.addChild(ZERO, auxNode);
-				auxNode.setParent(node);
-				
+
 				this.root = node;
-				
-				this.split(auxNode);
-				this.promote(auxNode);
 			}
+		} else {
+			insert(node.getChildren().get(index), element);
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private void split(BNode<T> node) {
 		node.split();
 	}
 
+	@SuppressWarnings("unused")
 	private void promote(BNode<T> node) {
-		node.promote();
-	}
-
-	// METODOS AUXILIARES PARA A IMPLEMENTACAO
-	
-	private boolean isLower(BNode<T> node, T element, int index) {
-		return index < node.size() && node.getElementAt(index).compareTo(element) < ZERO;
-	}
-
-	private boolean isEqual(BNode<T> node, T element, int index) {
-		return index < node.size() && node.getElementAt(index).compareTo(element) == ZERO;
-	}
-	
-	private BNode<T> searchLeafNode(T element, BNode<T> node) {
-		int index = 0;
-		
-        while(isLower(node, element, index))
-        	index++;
-        
-        if(node.isLeaf())
-        	return node;
-        
-        return searchLeafNode(element, node.getChildren().get(index));
+		node.promote((node.size() - 1) / 2);
 	}
 
 	// NAO PRECISA IMPLEMENTAR OS METODOS ABAIXO
+
 	@Override
 	public BNode<T> maximum(BNode<T> node) {
 		// NAO PRECISA IMPLEMENTAR
