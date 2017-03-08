@@ -9,16 +9,17 @@ public class SkipListImpl<T> implements SkipList<T> {
 	protected int height;
 	protected int maxHeight;
 
-	protected boolean USE_MAX_HEIGHT_AS_HEIGHT = true;/*
-														 * OBS: FOI PRECISO
-														 * INICIALIZAR COM TRUE
-														 * PARA TESTAR, PARA
-														 * TESTAR FALSE EH
-														 * PRECISO TROCAR ESSE
-														 * VALOR AQUI E NA
-														 * CLASSE DE TESTE PARA
-														 * FALSE
-														 */
+	protected boolean USE_MAX_HEIGHT_AS_HEIGHT = true;
+	/*
+	 * OBS: FOI PRECISO
+	 * INICIALIZAR COM TRUE
+	 * PARA TESTAR, PARA
+	 * TESTAR FALSE EH
+	 * PRECISO TROCAR ESSE
+	 * VALOR AQUI E NA
+	 * CLASSE DE TESTE PARA
+	 * FALSE
+	*/
 	protected double PROBABILITY = 0.5;
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
