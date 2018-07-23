@@ -11,9 +11,8 @@ public interface SkipList<T> {
 	public void insert(int key, T newValue, int height);
 
 	/**
-	 * Removes a node (containing the given key) from the skip list. If the
-	 * given key is not present is any node of the skip list, it remains
-	 * unchanged.
+	 * Removes a node (containing the given key) from the skip list. If the given
+	 * key is not present is any node of the skip list, it remains unchanged.
 	 */
 	public void remove(int key);
 
@@ -23,22 +22,33 @@ public interface SkipList<T> {
 	public int height();
 
 	/**
-	 * Searches a node (containing the given key) in the skip list. If the key
-	 * is not present in any node of the skip list, it returns null.
+	 * Searches a node (containing the given key) in the skip list. If the key is
+	 * not present in any node of the skip list, it returns null.
 	 * 
 	 */
 	public SkipListNode<T> search(int key);
 
 	/**
 	 * Returns the size (number of real elements) of the skip list. The sentinel
-	 * nodes are not considered. For example, just after instantiating a skip
-	 * list it has the first and the NIL nodes, but its size is 0.
+	 * nodes are not considered. For example, just after instantiating a skip list
+	 * it has the first and the NIL nodes, but its size is 0.
 	 */
 	public int size();
 
 	/**
-	 * Returns an array containing all nodes (including sentinel nodes) of the
-	 * skip list in order.
+	 * Returns an array containing all nodes (including sentinel nodes) of the skip
+	 * list in order.
 	 */
 	public SkipListNode<T>[] toArray();
+
+	/**
+	 * Returns an array containing nodes ascending ordered by key and descending
+	 * ordered by height;
+	 */
+	public int[] arrayByNodeByHeightOrdered();
+
+	/**
+	 * Changes a node height.
+	 */
+	public void changeNodeHeight(int key, int newHeight);
 }

@@ -11,15 +11,9 @@ public class SkipListImpl<T> implements SkipList<T> {
 
 	protected boolean USE_MAX_HEIGHT_AS_HEIGHT = true;
 	/*
-	 * OBS: FOI PRECISO
-	 * INICIALIZAR COM TRUE
-	 * PARA TESTAR, PARA
-	 * TESTAR FALSE EH
-	 * PRECISO TROCAR ESSE
-	 * VALOR AQUI E NA
-	 * CLASSE DE TESTE PARA
-	 * FALSE
-	*/
+	 * OBS: FOI PRECISO INICIALIZAR COM TRUE PARA TESTAR, PARA TESTAR FALSE EH
+	 * PRECISO TROCAR ESSE VALOR AQUI E NA CLASSE DE TESTE PARA FALSE
+	 */
 	protected double PROBABILITY = 0.5;
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -37,9 +31,9 @@ public class SkipListImpl<T> implements SkipList<T> {
 
 	/**
 	 * Faz a ligacao inicial entre os apontadores forward do ROOT e o NIL Caso
-	 * esteja-se usando o level do ROOT igual ao maxLevel esse metodo deve
-	 * conectar todos os forward. Senao o ROOT eh inicializado com level=1 e o
-	 * metodo deve conectar apenas o forward[0].
+	 * esteja-se usando o level do ROOT igual ao maxLevel esse metodo deve conectar
+	 * todos os forward. Senao o ROOT eh inicializado com level=1 e o metodo deve
+	 * conectar apenas o forward[0].
 	 */
 	private void connectRootToNil() {
 		if (USE_MAX_HEIGHT_AS_HEIGHT) {
@@ -207,4 +201,88 @@ public class SkipListImpl<T> implements SkipList<T> {
 		return array;
 	}
 
+	public int[] arrayByNodeByHeightOrdered() {
+
+		int[] array = new int[this.size()];
+		int position = 0;
+
+		for (int i = (height - 1); i >= 0; i--) {
+			SkipListNode<T> node = root;
+
+			while (!node.getForward(i).equals(NIL)) {
+				node = node.getForward(i);
+
+				if (node.getHeight() - 1 == i) {
+					array[position] = node.getKey();
+					position++;
+				}
+			}
+		}
+
+		return array;
+	}
+
+	public void changeNodeHeight(int key, int newHeight) {
+		SkipListNode<T> node = this.search(key);
+
+		if (node != null && newHeight > 0) {
+
+			if (newHeight > node.getHeight()) {
+				for (int i = node.getHeight(); i < newHeight; i++) {
+					SkipListNode<T> aux = this.root;
+
+					if (aux.forward.length <= node.forward.length) {
+						aux.forward = this.increaseForwardArraySize(aux.forward);
+						NIL.forward = this.increaseForwardArraySize(NIL.forward);
+						aux.forward[i] = NIL;
+					}
+
+					while (aux.forward[i].getKey() < key) {
+						aux = aux.forward[i];
+					}
+
+					node.setHeight(node.getHeight() + 1);
+					node.forward = this.increaseForwardArraySize(node.forward);
+					node.forward[i] = aux.forward[i];
+
+					aux.forward[i] = node;
+
+					if (node.height > this.height) {
+						this.height = node.height;
+						this.root.height = node.height;
+						this.NIL.height = node.height;
+					}
+				}
+
+			} else if (newHeight < node.getHeight()) {
+				for (int i = (node.getHeight() - 1); i >= newHeight; i--) {
+					SkipListNode<T> aux = this.root;
+
+					while (aux.forward[i].getKey() < key) {
+						aux = aux.forward[i];
+					}
+
+					node.setHeight(node.getHeight() - 1);
+					aux.forward[i] = node.forward[i];
+					node.forward[i] = null;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Increase by one the size of the forward array of a node.
+	 */
+	@SuppressWarnings("unchecked")
+	private SkipListNode<T>[] increaseForwardArraySize(SkipListNode<T>[] array) {
+		int length = array.length;
+
+		SkipListNode<T>[] newArray = new SkipListNode[length + 1];
+
+		for (int i = 0; i < array.length; i++) {
+			newArray[i] = array[i];
+		}
+
+		return newArray;
+	}
 }

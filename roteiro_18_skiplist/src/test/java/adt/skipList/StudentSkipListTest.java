@@ -38,13 +38,9 @@ public class StudentSkipListTest {
 
 		array = skip.toArray();
 		if (((SkipListImpl<String>) skip).USE_MAX_HEIGHT_AS_HEIGHT) {
-			assertEquals(
-					"[<ROOT,4,4>, <0,1>, <5,3>, <10,2>, <15,3>, <20,1>, <NIL,4>]",
-					Arrays.toString(array));
+			assertEquals("[<ROOT,4,4>, <0,1>, <5,3>, <10,2>, <15,3>, <20,1>, <NIL,4>]", Arrays.toString(array));
 		} else {
-			assertEquals(
-					"[<ROOT,4,3>, <0,1>, <5,3>, <10,2>, <15,3>, <20,1>, <NIL,4>]",
-					Arrays.toString(array));
+			assertEquals("[<ROOT,4,3>, <0,1>, <5,3>, <10,2>, <15,3>, <20,1>, <NIL,4>]", Arrays.toString(array));
 		}
 		assertEquals(0, array[0].getForward(0).getKey());
 		assertEquals(5, array[0].getForward(1).getKey());
@@ -76,13 +72,9 @@ public class StudentSkipListTest {
 
 		array = skip.toArray();
 		if (((SkipListImpl<String>) skip).USE_MAX_HEIGHT_AS_HEIGHT) {
-			assertEquals(
-					"[<ROOT,4,4>, <0,1>, <5,3>, <10,2>, <15,3>, <20,1>, <NIL,4>]",
-					Arrays.toString(array));
+			assertEquals("[<ROOT,4,4>, <0,1>, <5,3>, <10,2>, <15,3>, <20,1>, <NIL,4>]", Arrays.toString(array));
 		} else {
-			assertEquals(
-					"[<ROOT,4,3>, <0,1>, <5,3>, <10,2>, <15,3>, <20,1>, <NIL,4>]",
-					Arrays.toString(array));
+			assertEquals("[<ROOT,4,3>, <0,1>, <5,3>, <10,2>, <15,3>, <20,1>, <NIL,4>]", Arrays.toString(array));
 		}
 
 		assertEquals(0, array[0].getForward(0).getKey());
@@ -137,7 +129,7 @@ public class StudentSkipListTest {
 		skip.insert(-2, "J", 1);
 
 		assertEquals(10, skip.size());
-		
+
 		skip.remove(10);
 		skip.remove(20);
 		skip.remove(0);
@@ -148,13 +140,9 @@ public class StudentSkipListTest {
 
 		array = skip.toArray();
 		if (((SkipListImpl<String>) skip).USE_MAX_HEIGHT_AS_HEIGHT) {
-			assertEquals(
-					"[<ROOT,4,4>, <-10,1>, <-2,1>, <9,2>, <17,2>, <30,3>, <NIL,4>]",
-					Arrays.toString(array));
+			assertEquals("[<ROOT,4,4>, <-10,1>, <-2,1>, <9,2>, <17,2>, <30,3>, <NIL,4>]", Arrays.toString(array));
 		} else {
-			assertEquals(
-					"[<ROOT,4,3>, <-10,1>, <-2,1>, <9,2>, <17,2>, <30,3>, <NIL,4>]",
-					Arrays.toString(array));
+			assertEquals("[<ROOT,4,3>, <-10,1>, <-2,1>, <9,2>, <17,2>, <30,3>, <NIL,4>]", Arrays.toString(array));
 		}
 		assertEquals(-10, array[0].getForward(0).getKey());
 		assertEquals(9, array[0].getForward(1).getKey());
@@ -184,5 +172,99 @@ public class StudentSkipListTest {
 			assertEquals("[<ROOT,4,1>, <NIL,4>]", Arrays.toString(array));
 		}
 		assertEquals(Integer.MAX_VALUE, array[0].getForward(0).getKey());
+	}
+
+	@Test
+	public void testPrintArrayByNodeByHeightOrdered() {
+		skip.insert(10, "A", 2);
+		skip.insert(20, "B", 1);
+		skip.insert(0, "C", 1);
+		skip.insert(15, "D", 3);
+		skip.insert(5, "E", 2);
+
+		assertEquals(Arrays.toString(new int[] { 15, 5, 10, 0, 20 }),
+				Arrays.toString(skip.arrayByNodeByHeightOrdered()));
+	}
+
+	@Test
+	public void testPrintArrayByNodeByHeightOrdered2() {
+		skip.insert(21, "A", 4);
+		skip.insert(8, "B", 4);
+		skip.insert(14, "C", 4);
+		skip.insert(17, "D", 2);
+		skip.insert(25, "E", 2);
+		skip.insert(4, "F", 3);
+		skip.insert(18, "G", 3);
+		skip.insert(12, "H", 3);
+
+		assertEquals(Arrays.toString(new int[] { 8, 14, 21, 4, 12, 18, 17, 25 }),
+				Arrays.toString(skip.arrayByNodeByHeightOrdered()));
+	}
+
+	@Test
+	public void testChangeNodeHeight() {
+		skip.insert(10, "A", 2);
+		skip.insert(20, "B", 1);
+		skip.insert(0, "C", 1);
+		skip.insert(15, "D", 3);
+		skip.insert(5, "E", 2);
+
+		skip.changeNodeHeight(15, 2);
+
+		array = skip.toArray();
+
+		assertEquals("[<ROOT,4,4>, <0,1>, <5,2>, <10,2>, <15,2>, <20,1>, <NIL,4>]", Arrays.toString(array));
+	}
+
+	@Test
+	public void testChangeNodeHeight2() {
+		skip.insert(10, "A", 2);
+		skip.insert(20, "B", 1);
+		skip.insert(0, "C", 1);
+		skip.insert(15, "D", 3);
+		skip.insert(5, "E", 2);
+
+		skip.changeNodeHeight(15, 3);
+
+		array = skip.toArray();
+
+		assertEquals("[<ROOT,4,4>, <0,1>, <5,2>, <10,2>, <15,3>, <20,1>, <NIL,4>]", Arrays.toString(array));
+	}
+
+	@Test
+	public void testChangeNodeHeight3() {
+		skip.insert(10, "A", 2);
+		skip.insert(20, "B", 1);
+		skip.insert(0, "C", 1);
+		skip.insert(15, "D", 3);
+		skip.insert(5, "E", 2);
+
+		skip.changeNodeHeight(15, 4);
+
+		array = skip.toArray();
+
+		assertEquals("[<ROOT,4,4>, <0,1>, <5,2>, <10,2>, <15,4>, <20,1>, <NIL,4>]", Arrays.toString(array));
+	}
+
+	@Test
+	public void testChangeNodeHeight4() {
+		skip.insert(21, "A", 4);
+		skip.insert(8, "B", 4);
+		skip.insert(14, "C", 4);
+		skip.insert(17, "D", 2);
+		skip.insert(25, "E", 2);
+		skip.insert(4, "F", 3);
+		skip.insert(18, "G", 3);
+		skip.insert(12, "H", 3);
+
+		skip.changeNodeHeight(21, 1);
+		skip.changeNodeHeight(8, 0);
+		skip.changeNodeHeight(17, 7);
+		skip.changeNodeHeight(21, 1);
+
+		array = skip.toArray();
+
+		assertEquals("[<ROOT,7,7>, <4,3>, <8,4>, <12,3>, <14,4>, <17,7>, <18,3>, <21,1>, <25,2>, <NIL,7>]",
+				Arrays.toString(array));
 	}
 }
