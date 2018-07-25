@@ -86,8 +86,7 @@ public class Teste{
 
 		bt.insert(59);
 
-		Integer max = bt.maximum(bt.getRoot());
-		int x = 3;
+		assertEquals(new Integer(122), bt.maximum(bt.getRoot()));
 	}
 
 }
