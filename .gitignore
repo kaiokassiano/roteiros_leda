@@ -15,3 +15,5 @@ tmp/
 .buildpath
 .target
 .recommenders/
+.idea/
+*.iml
